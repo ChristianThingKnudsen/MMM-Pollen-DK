@@ -24,7 +24,7 @@ module.exports = NodeHelper.create({
 		console.log("Fetching pollen data...");
 		var self = this;
 		const url = "https://www.astma-allergi.dk/umbraco/Api/PollenApi/GetPollenFeed";
-		const refreshTime = 300000; // Gets new data every 5 mins
+		const refreshTime = 120000; // Gets new data every 2 mins
 
 		fetch(url)
 			.then((res) => res.text())

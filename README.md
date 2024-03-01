@@ -18,7 +18,7 @@ Columns meaning:
 - Is season or not
 - Name
 - Current pollen status
-- Next upcoming pollen status
+- Next upcomming pollen status
 
 ## Config Options
 
