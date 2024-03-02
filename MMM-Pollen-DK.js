@@ -30,7 +30,6 @@ Module.register("MMM-Pollen-DK", {
 		this.currentViewIndex = 0;
 		this.views = ["VIEW_ALL"];
 		if (this.config.forecast) this.views.push("FORECAST");
-		// this.views = ["FORECAST"];
 	},
 
 	getData: function () {
@@ -58,6 +57,13 @@ Module.register("MMM-Pollen-DK", {
 			}
 		}
 		return true;
+	},
+	validateForecast(type) {
+		if (type) {
+			return true;
+		} else {
+			return pollenTypes[type] ? true : "Forecast type: '" + type + "' does not exist";
+		}
 	},
 	// Gets automatically called when the module starts
 	loaded: function (callback) {
@@ -87,8 +93,9 @@ Module.register("MMM-Pollen-DK", {
 
 		const regionIsValid = this.validateRegion(this.config.region);
 		const pollenTypesAreValid = this.validatePollenTypes(this.config.pollenTypes);
-		const iconSize = 35;
-		const textSize = "20px";
+		const forecastIsValid = this.validateForecast(this.config.forecast);
+		const iconSize = 30;
+		const textSize = "18px";
 
 		const data = this.pollenData;
 		if (!data) {
@@ -121,6 +128,11 @@ Module.register("MMM-Pollen-DK", {
 			return wrapper;
 		}
 
+		if (forecastIsValid != true) {
+			wrapper.innerHTML = forecastIsValid;
+			return wrapper;
+		}
+
 		if (this.config.showHeader) {
 			wrapper = this.renderTitle(wrapper);
 		}
@@ -142,12 +154,6 @@ Module.register("MMM-Pollen-DK", {
 		setTimeout(function () {
 			self.updateDom(1000);
 		}, this.config.displayTime);
-		return wrapper;
-
-		// setTimeout(function () {
-		// 	self.updateDom(1000);
-		// }, 10000);
-
 		return wrapper;
 	},
 	renderAll(data, wrapper, textSize, iconSize) {
@@ -310,13 +316,20 @@ Module.register("MMM-Pollen-DK", {
 		var labelRow = document.createElement("tr");
 		labelRow.setAttribute("width", "330px");
 
+		var timeCell = document.createElement("th");
+		timeCell.innerHTML = "Time";
+		timeCell.setAttribute("align", "left");
+		timeCell.style.fontSize = textSize;
+		labelRow.appendChild(timeCell);
+
 		// Pollen Type Icon
 		var iconCell = document.createElement("th");
-		iconCell.setAttribute("align", "left");
+		iconCell.setAttribute("align", "center");
 		iconCell.style.fontSize = textSize;
 		const iconUrl = this.getImage(type);
 		if (iconUrl) {
 			var logo = document.createElement("img");
+			logo.setAttribute("align", "center");
 			logo.src = iconUrl;
 			logo.width = iconSize;
 			logo.height = iconSize;
@@ -327,54 +340,6 @@ Module.register("MMM-Pollen-DK", {
 		}
 		labelRow.appendChild(iconCell);
 
-		// // Pollen Type Icon
-		// var pollenTypeLabel = document.createElement("th");
-		// pollenTypeLabel.setAttribute("width", "20px");
-		// pollenTypeLabel.setAttribute("align", "left");
-		// pollenTypeLabel.setAttribute("width", "20px");
-		// pollenTypeLabel.style.fontSize = textSize;
-
-		// labelRow.appendChild(pollenTypeLabel);
-
-		// // Pollen Season Icon
-		// var pollenSeasonLabel = document.createElement("th");
-		// var pollenSeasonIcon = document.createElement("i");
-		// pollenSeasonIcon.classList.add("fa", "fa-clock-o");
-		// pollenSeasonLabel.setAttribute("width", "20px");
-		// pollenSeasonLabel.appendChild(pollenSeasonIcon);
-		// pollenSeasonLabel.setAttribute("align", "left");
-		// pollenSeasonLabel.setAttribute("width", "20px");
-		// pollenSeasonLabel.style.fontSize = textSize;
-		// pollenSeasonIcon.style.fontSize = textSize;
-		// labelRow.appendChild(pollenSeasonLabel);
-
-		var timeCell = document.createElement("th");
-		timeCell.innerHTML = "Time";
-		timeCell.setAttribute("align", "left");
-		timeCell.style.fontSize = textSize;
-		labelRow.appendChild(timeCell);
-
-		// Pollen Value Icon
-		var pollenValueLabel = document.createElement("th");
-		var pollenValueIcon = document.createElement("i");
-		pollenValueIcon.classList.add("fa", "fa-leaf");
-		pollenValueLabel.appendChild(pollenValueIcon);
-		pollenValueLabel.setAttribute("align", "left");
-		pollenValueLabel.style.fontSize = textSize;
-		pollenValueIcon.style.fontSize = textSize;
-
-		labelRow.appendChild(pollenValueLabel);
-
-		// // Next pollen value icon
-		// var pollenNextLabel = document.createElement("th");
-		// var pollenNextIcon = document.createElement("i");
-		// pollenNextIcon.classList.add("fa", "fa-line-chart");
-		// pollenNextLabel.appendChild(pollenNextIcon);
-		// pollenNextLabel.setAttribute("align", "left");
-		// labelRow.appendChild(pollenNextLabel);
-		// pollenNextLabel.style.fontSize = textSize;
-		// pollenNextLabel.style.fontSize = textSize;
-
 		table.appendChild(labelRow);
 
 		const regionData = data.fields?.[regionId];
@@ -382,10 +347,7 @@ Module.register("MMM-Pollen-DK", {
 		const predictions = pollenData?.predictions?.mapValue?.fields;
 
 		var row = document.createElement("tr");
-		// Empty
-		var empty = document.createElement("td");
-		row.appendChild(empty);
-		// Type
+		// Time cell
 		var timeCell = document.createElement("td");
 		timeCell.setAttribute("align", "left");
 		timeCell.innerHTML = "Nu";
@@ -393,7 +355,7 @@ Module.register("MMM-Pollen-DK", {
 		row.appendChild(timeCell);
 		// Value
 		var valueCell = document.createElement("td");
-		valueCell.setAttribute("align", "left");
+		valueCell.setAttribute("align", "center");
 		const value = parseInt(pollenData?.level?.integerValue);
 		if (value > 0) {
 			valueCell.innerHTML = value;
@@ -420,88 +382,6 @@ Module.register("MMM-Pollen-DK", {
 		table.appendChild(row);
 		table = this.wrapperRenderForecastRows(table, type, predictions, textSize);
 
-		// for (let i = 0; i < pollenTypes.length; i++) {
-		// 	// const pollenId = this.pollenTypes[pollenTypes[i]];
-		// 	// const regionId = this.regions[region];
-		// 	// console.log("pollenId");
-		// 	// console.log(pollenId);
-		// 	// console.log("regionId");
-		// 	// console.log(regionId);
-
-		// 	// const regionData = data.fields?.[regionId];
-		// 	// const pollenData = regionData?.mapValue?.fields?.data?.mapValue?.fields?.[pollenId]?.mapValue?.fields;
-		// 	// console.log("pollenData for " + pollenTypes[i]);
-		// 	// console.log(pollenData);
-
-		// 	// const predictions = pollenData?.predictions?.mapValue?.fields;
-		// 	const nextPredictionCell = this.getLatestPrediction(pollenTypes[i], predictions, textSize);
-
-		// 	var iconCell = document.createElement("td");
-		// 	iconCell.setAttribute("align", "left");
-		// 	iconCell.style.fontSize = textSize;
-		// 	const iconUrl = this.getImage(pollenTypes[i]);
-		// 	if (iconUrl) {
-		// 		var logo = document.createElement("img");
-		// 		logo.src = iconUrl;
-		// 		logo.width = iconSize;
-		// 		logo.height = iconSize;
-		// 		logo.style.fontSize = textSize;
-		// 		iconCell.appendChild(logo);
-		// 	} else {
-		// 		iconCell.innerHTML = "ERROR";
-		// 	}
-
-		// 	var typeCell = document.createElement("td");
-		// 	typeCell.setAttribute("align", "left");
-		// 	const type = pollenTypes[i];
-		// 	typeCell.innerHTML = type;
-		// 	typeCell.style.fontSize = textSize;
-
-		// 	var valueCell = document.createElement("td");
-		// 	valueCell.setAttribute("align", "left");
-		// 	const value = parseInt(pollenData?.level?.integerValue);
-		// 	if (value > 0) {
-		// 		valueCell.innerHTML = value;
-		// 	} else {
-		// 		valueCell.innerHTML = "0";
-		// 	}
-		// 	const severity = this.getSeverity(type, value);
-
-		// 	switch (severity) {
-		// 		case "LOW":
-		// 			valueCell.style.color = "green";
-		// 			break;
-		// 		case "MEDIUM":
-		// 			valueCell.style.color = "yellow";
-		// 			break;
-		// 		case "HIGH":
-		// 			valueCell.style.color = "red";
-		// 			break;
-		// 		default:
-		// 			break;
-		// 	}
-		// 	valueCell.style.fontSize = textSize;
-
-		// 	var seasonCellLabel = document.createElement("td");
-		// 	var seasonCellIcon = document.createElement("i");
-		// 	seasonCellLabel.setAttribute("align", "left");
-		// 	if (pollenData?.inSeason?.booleanValue) {
-		// 		seasonCellIcon.classList.add("fa", "fa-check-circle");
-		// 	} else {
-		// 		seasonCellIcon.classList.add("fa", "fa-times-circle");
-		// 	}
-		// 	seasonCellLabel.style.fontSize = textSize;
-		// 	seasonCellIcon.style.fontSize = textSize;
-		// 	seasonCellLabel.appendChild(seasonCellIcon);
-
-		// 	row.appendChild(iconCell);
-		// 	row.appendChild(seasonCellLabel);
-		// 	row.appendChild(typeCell);
-		// 	row.appendChild(valueCell);
-		// 	row.appendChild(nextPredictionCell);
-
-		// 	table.appendChild(row);
-		// }
 		wrapper.appendChild(table);
 		return wrapper;
 	},
@@ -515,7 +395,6 @@ Module.register("MMM-Pollen-DK", {
 			let date = new Date(`${year}-${month}-${day}`);
 			dates.push(date);
 		}
-		// dates = dates.sort((a, b) => a - b);
 		dates.sort((a, b) => a - b);
 		var dayNames = ["Søn", "Man", "Tir", "Ons", "Tor", "Fre", "lør"];
 		var monthNames = ["Jan", "Feb", "Mar", "Apr", "Maj", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"];
@@ -531,19 +410,17 @@ Module.register("MMM-Pollen-DK", {
 			console.log(value);
 
 			var row = document.createElement("tr");
-			// Empty
-			var empty = document.createElement("td");
-			row.appendChild(empty);
-			// Type
+
+			// Timecell
 			var timeCell = document.createElement("td");
 			timeCell.setAttribute("align", "left");
-			timeCell.innerHTML = dayNames[date.getDay()] + " " + date.getDate() + " " + monthNames[date.getMonth()];
-			// timeCell.innerHTML = dayNames[date.getDay()];
+			timeCell.innerHTML = dayNames[date.getDay()] + " " + date.getDate() + ". " + monthNames[date.getMonth()];
 			timeCell.style.fontSize = textSize;
 			row.appendChild(timeCell);
 
+			//Valuecell
 			var valueCell = document.createElement("td");
-			valueCell.setAttribute("align", "left");
+			valueCell.setAttribute("align", "center");
 			if (value > 0) {
 				valueCell.innerHTML = value;
 			} else {
@@ -690,7 +567,6 @@ Module.register("MMM-Pollen-DK", {
 				this.now = this.getNow();
 				const data = JSON.parse(payload.data);
 				this.pollenData = data;
-				// this.updateDom(1000);
 				break;
 		}
 	}

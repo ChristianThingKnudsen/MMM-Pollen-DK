@@ -1,4 +1,17 @@
+.fa {
+  align-content: left;
+  text-align: left;
+}
+
 td,
 th {
-  padding-right: 10px;
+  padding: 5px;
+}
+
+table td {
+  border-top: 1px solid var(--color-text);
+}
+
+#stripped {
+  border-collapse: collapse;
 }
