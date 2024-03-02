@@ -8,10 +8,10 @@ th {
   padding: 5px;
 }
 
-#stripped {
+#stripped td {
   border-top: 1px solid var(--color-text);
 }
 
-table td {
+table {
   border-collapse: collapse;
 }
